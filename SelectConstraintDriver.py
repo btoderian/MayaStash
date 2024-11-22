@@ -37,5 +37,5 @@ def selectConstraintDriver():
    if sourceObjects:
        cmds.select(sourceObjects)
 
-def main():
-        selectConstraintDriver()
+if __name__ == "__main__":
+      selectConstraintDriver()
