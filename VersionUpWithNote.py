@@ -1,10 +1,14 @@
 ## Saves a new file in the current directory.  The version number and File Description will be updated automatically through this script.  Descriptions are optional! 
 ## You must follow this convention for naming your first file:
-## FileName_v001_FileDescription
+## FileName_v001_OptionalDescription
 ## This formatting will keep your files organized if sorted by time or name.
+
+## Use this python script to run or as a button:
+## import MayaStash.VersionUpWithNote ; MayaStash.VersionUpWithNote.Save()
 
 import os 
 import maya.cmds as cmds
+import re
 
 def saveWithNote_getVersion(file_path):
     # Extract version number from file name
@@ -36,11 +40,11 @@ def saveWithNote_getUserNote():
     if user_note == 'Cancel':
         return
         
-def versionUpWithNote():
+def Save():
     # Get the current file path
     file_path = cmds.file(q=True, sn=True)
     if not file_path:
-        cmds.warning("Please save the file before using this script.")
+        open_save_dialog()
         return
 
     if file_path:
@@ -75,6 +79,35 @@ def versionUpWithNote():
     cmds.headsUpMessage("File saved as: {}".format(new_file_path), t=10)
 
 if  __name__ == "__main__":
-    versionUpWithNote()
-  
-  
+    Save()
+
+def sSave():
+    Save()
+    cmds.headsUpMessage("SMoooooCH!", t= 0.3)
+
+def open_save_dialog(suggested_name="FileName_v001_OptionalDescription.ma"):
+    """
+    Opens the Maya file save dialog with a suggested file name.
+    """
+    # Open Maya's file save dialog
+    file_path = cmds.fileDialog2(
+        fileMode=0,  # 0 for Save mode
+        dialogStyle=2,  # Maya-style dialog
+        caption="Save File As",
+        startingDirectory=(cmds.workspace(query=True, directory=True)+suggested_name),
+        fileFilter="Maya Files (*.ma *.mb)",
+        okCaption="Save",
+    )
+    
+    # Display the selected path (or save the file here if desired)
+    if file_path:
+        # Ensure the file path has the correct extension
+        if not file_path[0].endswith((".ma", ".mb")):
+            file_path[0] += ".ma"  # Default to `.ma` if no extension provided
+
+        # Save the file
+        cmds.file(rename=file_path[0])
+        cmds.file(save=True, type="mayaAscii")
+        print("File saved as:", file_path[0])
+    else:
+        print("No file saved.")
